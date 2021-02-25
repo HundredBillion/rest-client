@@ -604,6 +604,7 @@ module RestClient
     def default_headers
       {
         :accept => '*/*',
+        :accept_encoding => 'gzip, deflate',
         :user_agent => RestClient::Platform.default_user_agent,
       }
     end
@@ -843,6 +844,7 @@ module RestClient
         end
         response = RawResponse.new(tempfile, res, self, start_time)
       else
+        decoded = Request.decode(res['content-encoding'], res.body)
         response = Response.create(res.body, res, self, start_time)
       end
 
