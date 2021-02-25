@@ -517,6 +517,24 @@ module RestClient
 
       cert_store
     end
+    
+    def self.decode content_encoding, body	
+      if (!body) || body.empty?	
+        body	
+      elsif content_encoding == 'gzip'	
+        Zlib::GzipReader.new(StringIO.new(body)).read	
+      elsif content_encoding == 'deflate'	
+        begin	
+          Zlib::Inflate.new.inflate body	
+        rescue Zlib::DataError	
+          # No luck with Zlib decompression. Let's try with raw deflate,	
+          # like some broken web servers do.	
+          Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate body	
+        end	
+      else	
+        body	
+      end	
+    end
 
     def redacted_uri
       if uri.password
